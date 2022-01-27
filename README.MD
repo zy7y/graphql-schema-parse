@@ -172,16 +172,23 @@ gql parse --help
 ```
 output:
 ```shell
-Usage: cli.py parse [OPTIONS] FROM_PATH TO_DIRECTORY
+Usage: gql parse [OPTIONS] FROM_PATH TO_DIRECTORY
 
   将Graphql接口文档转成gql文件/Json文件 :param from_path: 接口文档地址, 本地JSON文件地址(.json) 或者 本地
   SDL文件(.schema ), 或者 服务器URL填入(服务器的IP:PORT) :param to: 转换之后的文件类型, 可选
+  to_json(.json) / to_gql(.gql) / to_sqlmap(.txt) :param headers: from_type
+  为url时可选项，请求头文件地址(.json) :param depth: query语句体中可用查询字段递归深度 :param
+  to_directory: 转换之后文件，保存目录 :return:
+
+Arguments:
+  FROM_PATH     接口文档地址, 本地JSON文件地址(.json) 或者 本地 SDL文件(.schema ), 或者
+                服务器URL填入(服务器的IP:PORT)  [required]
   TO_DIRECTORY  生成文件保存目录，不存在时，自动创建  [required]
 
 Options:
-  --headers TEXT   url方式获取接口文档时，可选项传入请求头json文件地址
-  --to [json|gql]  [default: ToType.to_json]
-  --depth INTEGER  query语句体中可用查询字段递归深度  [default: 1]
-  --help           Show this message and exit.
+  --headers TEXT          url方式获取接口文档时，可选项传入请求头json文件地址
+  --to [json|gql|sqlmap]  [default: ToType.to_json]
+  --depth INTEGER         query语句体中可用查询字段递归深度  [default: 1]
+  --help                  Show this message and exit.
 
 ```
