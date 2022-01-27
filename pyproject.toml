@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "graphql-schema-parse"
+version = "0.2.0"
+description = "Graphql文档解析工具，提供解析成前端/Postman可用的query语句(.gql)或者RESTFul可使用的(.json)文件能力"
+authors = ["柒意 <396667207@qq.com>"]
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/zy7y/graphql-schema-parse.git"
+homepage = "https://github.com/zy7y/graphql-schema-parse.git"
+keywords = ["graphql", "restful", "parse", "gql", "test"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+graphql-core = "^3.2.0"
+Jinja2 = "^3.0.3"
+typer = "^0.4.0"
+
+[tool.poetry.dev-dependencies]
+black = "^21.12b0"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+gql = "graphql_schema_parse.cli:app"

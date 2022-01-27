@@ -1,0 +1,29 @@
+input AddUserInput {
+  """用户名"""
+  username: String!
+
+  """密码"""
+  password: String!
+}
+
+type Message {
+  errmsg: String!
+}
+
+type Mutation {
+  addUser(username: String!, password: String!): User!
+  addUserInput(user: AddUserInput!): User!
+  delUser(id: Int!): Message!
+}
+
+type Query {
+  users: [User!]!
+}
+
+type User {
+  """用户id"""
+  id: Int!
+
+  """用户名"""
+  username: String!
+}

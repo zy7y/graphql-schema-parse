@@ -1,0 +1,8 @@
+ mutation addUser ($username: String!, $password: String!){
+        addUser (username: $username, password: $password){
+                  id
+                  username
+                 }
+             
+        }
+        

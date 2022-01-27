@@ -1,0 +1,7 @@
+ mutation delUser ($id: Int!){
+        delUser (id: $id){
+                  errmsg
+                 }
+             
+        }
+        

@@ -1,0 +1,5 @@
+POST /graphql HTTP/1.1
+HOST: http://127.0.0.1:8000
+Content-Type: application/json
+
+{"query": " query users {\n        users{\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {}, "operationName": "users"}

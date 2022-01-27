@@ -1,0 +1,1 @@
+{"query": " mutation addUser ($username: String!, $password: String!){\n        addUser (username: $username, password: $password){\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {"username": "", "password": ""}, "operationName": "addUser"}

@@ -1,0 +1,8 @@
+ mutation addUserInput ($user: AddUserInput!){
+        addUserInput (user: $user){
+                  id
+                  username
+                 }
+             
+        }
+        

@@ -1,0 +1,6 @@
+POST /graphql HTTP/1.1
+HOST: http://127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " mutation addUser ($username: String!, $password: String!){\n        addUser (username: $username, password: $password){\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {"username": "*", "password": "*"}, "operationName": "addUser"}
