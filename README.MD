@@ -1,3 +1,4 @@
+[![Downloads](https://pepy.tech/badge/graphql-schema-parse)](https://pepy.tech/project/graphql-schema-parse)
 # graphql_schema_parse
 > 解析GraphQL文档，并提供将其转成**.gql**(前端查询可用得query字符串)，**.json**(requests可用得json关键字参数接收数据)
 
