@@ -109,7 +109,7 @@ class GraphqlDocsParse(ABC):
 
         if (start := field_name.find("[")) != -1:
             end = field_name.find("]")
-            field_name = field_name[start + 1 : end]
+            field_name = field_name[start + 1: end]
 
         if field_name.endswith("!"):
             field_name = field_name[0:-1]
@@ -140,7 +140,7 @@ class GraphqlDocsParse(ABC):
 
             if (start := v_type.find("[")) != -1:
                 end = v_type.find("]")
-                v_type = v_type[start + 1 : end]
+                v_type = v_type[start + 1: end]
                 flag = True
 
             if v_type.endswith("!"):
@@ -308,11 +308,13 @@ class GraphqlDocsParseUrl(GraphqlDocsParse):
         返回sqlmap模板字符串
         :return:
         """
-        end = self.url.rfind("/")
+        url_host = self.url[self.url.find("//") + 2:]
+        host = url_host.split("/")[0]
+        url = "/".join(url_host.split("/")[1:])
         headers = json.dumps(self.headers)[1:-1].replace('"', "").split(",")
         return Template(
-            "POST {{url}} HTTP/1.1\nHOST: {{host}}\n{%for header in headers%}{{header|trim}}\n{%endfor%}"
-        ).render(url=self.url[end:], host=self.url[:end], headers=headers)
+            "POST /{{url}} HTTP/1.1\nHOST: {{host}}\n{%for header in headers%}{{header|trim}}\n{%endfor%}"
+        ).render(url=url, host=host, headers=headers)
 
 
 class GraphqlDocsParseFile(GraphqlDocsParse):
