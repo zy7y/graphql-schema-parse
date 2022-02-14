@@ -19,19 +19,21 @@ from queue import Queue
 from graphql import get_introspection_query
 from graphql import build_schema
 from graphql import build_client_schema
-from graphql import GraphQLInputObjectType
-from graphql import GraphQLInputField
-from graphql import GraphQLArgument
-from graphql import GraphQLNamedType
-from graphql import GraphQLField
 from graphql import GraphQLSchema
+from graphql import GraphQLArgument
+from graphql import GraphQLField
+from graphql import GraphQLInputField
+from graphql import GraphQLNamedType
+from graphql import GraphQLScalarType
 from graphql import GraphQLObjectType
+from graphql import GraphQLInputObjectType
 from jinja2 import Template
 from typer import progressbar
 
 __all__ = ["make_action"]
 
 VarsFieldType = Union[GraphQLField, GraphQLInputField, GraphQLArgument]
+DefinitionType = Union[GraphQLInputObjectType, GraphQLScalarType]
 
 url_regx = (
     r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
@@ -70,11 +72,11 @@ class GraphqlDocsParse(ABC):
 
     @staticmethod
     def query_template(
-        is_type: str,
-        operation_name: str,
-        vars_str: str,
-        resolve_str: str,
-        args: List[str],
+            is_type: str,
+            operation_name: str,
+            vars_str: str,
+            resolve_str: str,
+            args: List[str],
     ) -> str:
         """
         query语句模板
@@ -118,10 +120,10 @@ class GraphqlDocsParse(ABC):
         return self.schemas.type_map.get(field_name)
 
     def get_variables(
-        self,
-        items: Dict[str, VarsFieldType],
-        data_map: Optional[Dict[Any, Any]] = None,
-        is_sqlmap: bool = False,
+            self,
+            items: Dict[str, VarsFieldType],
+            data_map: Optional[Dict[Any, Any]] = None,
+            is_sqlmap: bool = False,
     ) -> Dict[str, Any]:
         """
         填充数据
@@ -147,9 +149,7 @@ class GraphqlDocsParse(ABC):
             if v_type.endswith("!"):
                 v_type = v_type[0:-1]
 
-            type_obj: Optional[GraphQLInputObjectType] = self.schemas.type_map.get(
-                v_type
-            )
+            type_obj: Optional[DefinitionType] = self.schemas.type_map.get(v_type)
 
             # Input 输入类型
             if isinstance(type_obj, GraphQLInputObjectType):
@@ -158,28 +158,35 @@ class GraphqlDocsParse(ABC):
                     data_map = {k: [variables]}
                 else:
                     data_map = {k: variables}
-
             # 标量类型
-            elif type_obj.name in GraphqlDocsParse.scalar_default:
-                if is_sqlmap and type_obj.name in GraphqlDocsParse.sqlmap_regx:
+            else:
+                if type_obj.name in GraphqlDocsParse.scalar_default:
+                    type_name = type_obj.name
+                # 自定义标量类型
+                elif (
+                        element_type := v_type.split("_")[1]
+                ) in GraphqlDocsParse.scalar_default:
+                    type_name = element_type
+                else:
+                    raise TypeError(f"类型 {v_type} 未设置默认数据哦", type(v.type), v, k)
+
+                if is_sqlmap and type_name in GraphqlDocsParse.sqlmap_regx:
                     result = "*"
                 else:
-                    result = GraphqlDocsParse.scalar_default[type_obj.name]
+                    result = GraphqlDocsParse.scalar_default[type_name]
 
                 if flag:
                     data_map[k] = [result]
                 else:
                     data_map[k] = result
-            else:
-                raise TypeError(f"该类型({v_type})设置默认数据哦", type(v.type))
 
         return data_map
 
     def find_fields(
-        self,
-        field_obj: Union[GraphQLNamedType, GraphQLObjectType],
-        results: Optional[List[str]] = None,
-        depth: int = 1,
+            self,
+            field_obj: Union[GraphQLNamedType, GraphQLObjectType],
+            results: Optional[List[str]] = None,
+            depth: int = 1,
     ):
         """
         递归找到query语句中可用查询字段列表
@@ -203,7 +210,7 @@ class GraphqlDocsParse(ABC):
         return results
 
     def get_query_str(
-        self, is_type: str, query_name: str, field_obj: GraphQLField, depth: int
+            self, is_type: str, query_name: str, field_obj: GraphQLField, depth: int
     ) -> str:
         """
         生成query 语句
@@ -451,11 +458,11 @@ class MakeBurpFile(MakeSqlmapFile):
 
 
 def make_action(
-    path: str,
-    directory: str,
-    to_type: str,
-    headers: Optional[Dict[str, str]] = None,
-    depth: int = 1,
+        path: str,
+        directory: str,
+        to_type: str,
+        headers: Optional[Dict[str, str]] = None,
+        depth: int = 1,
 ):
     """
     对cli程序暴露的制作文件完整方法
