@@ -5,6 +5,7 @@ from abc import ABC
 from abc import abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
+from typing import IO
 from typing import Tuple
 from typing import Text
 from typing import List
@@ -380,7 +381,10 @@ class MakeFile:
         with ThreadPoolExecutor() as executor:
             with progressbar(range(qsize), label=f"进度") as progress:
                 for _ in progress:
-                    executor.submit(self.make_file, self.parse_obj.json_queue.get())
+                    future = executor.submit(
+                        self.make_file, self.parse_obj.json_queue.get()
+                    )
+                    future.result()
                     total += 1
         return total
 
@@ -422,6 +426,30 @@ class MakeSqlmapFile(MakeFile):
             f.write(self.template + "\n" + json.dumps(info))
 
 
+class MakeBurpFile(MakeSqlmapFile):
+    separate = "=" * 66
+
+    def __init__(self, parse_obj: GraphqlDocsParse, path: str, template: str):
+        self.fp: Optional[IO] = None
+        super().__init__(parse_obj, path, template)
+
+    def __enter__(self):
+        self.fp = open(self.path + "/burp.txt", "a", encoding="utf-8")
+        return self
+
+    def make_file(self, info: Dict[str, Any]):
+        context = Template(
+            "{{separate}}\n\n{{separate}}\n{{template}}\n{{separate}}\n\n\n"
+        ).render(
+            separate=MakeBurpFile.separate,
+            template=self.template + "\n" + json.dumps(info),
+        )
+        self.fp.write(context)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.fp.close()
+
+
 def make_action(
     path: str,
     directory: str,
@@ -433,7 +461,7 @@ def make_action(
     对cli程序暴露的制作文件完整方法
     :param path: 文件（.json） / (.graphql) / url  路径
     :param directory: 保存在该目录文件下，如果不存在则会创建
-    :param to_type: 可选json, gql, sqlmap
+    :param to_type: 可选json, gql, sqlmap, burp
     :param headers: 当path 为 url内容时的可选项
     :param depth: 生成的query语句中最大递归深度 默认为1
     :return:
@@ -448,6 +476,12 @@ def make_action(
             template = parse_obj.sqlmap_template()
             parse_obj.start(depth, True)
             return MakeSqlmapFile(parse_obj, directory, template).async_write()
+        if to_type == "burp":
+            template = parse_obj.sqlmap_template()
+            parse_obj.start(depth, True)
+            with MakeBurpFile(parse_obj, directory, template) as make:
+                make.async_write()
+            return 1
 
     elif suffix == "json":
         parse_obj = GraphqlDocsParseJson(path)

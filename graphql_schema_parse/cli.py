@@ -21,6 +21,7 @@ class ToType(str, Enum):
     to_json = "json"
     to_jgl = "gql"
     to_sqlmap = "sqlmap"
+    to_burp = "burp"
 
 
 @app.command("docs")
@@ -31,7 +32,7 @@ def visit_docs():
     """
     visit = confirm("即将访问文档，确认?")
     if visit:
-        launch("https://gitee.com/zy7y/tablefill.git")
+        launch("https://github.com/zy7y/graphql-schema-parse")
 
 
 @app.command("parse")
@@ -48,7 +49,7 @@ def make_cli(
     """
     将Graphql接口文档转成gql文件/Json文件
     :param from_path: 接口文档地址, 本地JSON文件地址(.json) 或者 本地 SDL文件(.schema ), 或者 服务器URL填入(服务器的IP:PORT)
-    :param to: 转换之后的文件类型, 可选 to_json(.json) / to_gql(.gql) / to_sqlmap(.txt)
+    :param to: 转换之后的文件类型, 可选 to_json(.json) / to_gql(.gql) / to_sqlmap(.txt)/ to_burp(.txt)
     :param headers: from_type 为url时可选项，请求头文件地址(.json)
     :param depth: query语句体中可用查询字段递归深度
     :param to_directory: 转换之后文件，保存目录

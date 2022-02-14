@@ -1,6 +1,6 @@
 [![Downloads](https://pepy.tech/badge/graphql-schema-parse)](https://pepy.tech/project/graphql-schema-parse)
 # graphql_schema_parse
-> 解析GraphQL文档，并提供将其转成**.gql**(前端查询可用得query字符串)，**.json**(requests可用得json关键字参数接收数据)
+> 解析GraphQL文档，并提供将其转成**.gql**(前端查询可用的query字符串)，**.json**(requests可用的json关键字参数接收数据)，**.txt**(sqlmap可用的扫描文件 --to sqlamp 支持的是 sqlmap -r 单接口, --to burp 支持的是sqlmap -l 多接口扫描)
 
 ## [GraphQL](https://graphql.cn/)
 > GraphQL 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时，详细内容点击标题访问官网
@@ -147,7 +147,7 @@ print(post(url, json=data).json())
 **addUserInput.txt文件内容**
 ```text
 POST /graphql HTTP/1.1
-HOST: http://127.0.0.1:8000
+HOST: 127.0.0.1:8000
 Authorization: Bearer token
 Content-Type: application/json
 
@@ -166,6 +166,65 @@ sqlmap -r addUserInput.txt --level 5 --risk 3
 ![](images/入库数据.png)
 **扫描结果（获取到了我的数据库为SQLlite）**
 ![](images/注入结果.png)
+6. txt文件(sqlmap -l 可用的批量扫描文件)
+```shell
+gql  parse http://127.0.0.1:8000 --headers examples\headers.json --to burp demo1
+```
+```shell
+# output demo1/burp.txt
+==================================================================
+
+==================================================================
+POST /graphql HTTP/1.1
+HOST: 127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " query users {\n        users{\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {}, "operationName": "users"}
+==================================================================
+
+==================================================================
+
+==================================================================
+POST /graphql HTTP/1.1
+HOST: 127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " mutation addUser ($username: String!, $password: String!){\n        addUser (username: $username, password: $password){\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {"username": "*", "password": "*"}, "operationName": "addUser"}
+==================================================================
+
+==================================================================
+
+==================================================================
+POST /graphql HTTP/1.1
+HOST: 127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " mutation addUserInput ($user: AddUserInput!){\n        addUserInput (user: $user){\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {"user": {"username": "*", "password": "*"}}, "operationName": "addUserInput"}
+==================================================================
+
+==================================================================
+
+==================================================================
+POST /graphql HTTP/1.1
+HOST: 127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " mutation delUser ($id: Int!){\n        delUser (id: $id){\n                  errmsg\n                 }\n             \n        }\n        ", "variables": {"id": 0}, "operationName": "delUser"}
+==================================================================
+
+```
+**扫描结果**
+```shell
+# 扫描命令
+sqlmap -l demo1\burp.txt  
+```
+![burp](images/burp.png)
+![result](images/burpresult.png)
+![csv](images/csv.png)
 
 # 参数详情
 ```shell
@@ -173,23 +232,23 @@ gql parse --help
 ```
 output:
 ```shell
-Usage: gql parse [OPTIONS] FROM_PATH TO_DIRECTORY
+Usage: cli.py parse [OPTIONS] FROM_PATH TO_DIRECTORY
 
   将Graphql接口文档转成gql文件/Json文件 :param from_path: 接口文档地址, 本地JSON文件地址(.json) 或者 本地
   SDL文件(.schema ), 或者 服务器URL填入(服务器的IP:PORT) :param to: 转换之后的文件类型, 可选
-  to_json(.json) / to_gql(.gql) / to_sqlmap(.txt) :param headers: from_type
-  为url时可选项，请求头文件地址(.json) :param depth: query语句体中可用查询字段递归深度 :param
-  to_directory: 转换之后文件，保存目录 :return:
+  to_json(.json) / to_gql(.gql) / to_sqlmap(.txt)/ to_burp(.txt) :param
+  headers: from_type 为url时可选项，请求头文件地址(.json) :param depth: query语句体中可用查询字段递归深度
+  :param to_directory: 转换之后文件，保存目录 :return:
 
 Arguments:
-  FROM_PATH     接口文档地址, 本地JSON文件地址(.json) 或者 本地 SDL文件(.schema ), 或者
+  FROM_PATH     接口文档地址, 本地JSON文件地址(.json) 或者 本地 SDL文件(.graphql ), 或者
                 服务器URL填入(服务器的IP:PORT)  [required]
   TO_DIRECTORY  生成文件保存目录，不存在时，自动创建  [required]
 
 Options:
-  --headers TEXT          url方式获取接口文档时，可选项传入请求头json文件地址
-  --to [json|gql|sqlmap]  [default: ToType.to_json]
-  --depth INTEGER         query语句体中可用查询字段递归深度  [default: 1]
-  --help                  Show this message and exit.
+  --headers TEXT               url方式获取接口文档时，可选项传入请求头json文件地址
+  --to [json|gql|sqlmap|burp]  [default: ToType.to_json]
+  --depth INTEGER              query语句体中可用查询字段递归深度  [default: 1]
+  --help                       Show this message and exit.
 
 ```

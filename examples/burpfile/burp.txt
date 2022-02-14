@@ -1,0 +1,44 @@
+==================================================================
+
+==================================================================
+POST /graphql HTTP/1.1
+HOST: 127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " query users {\n        users{\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {}, "operationName": "users"}
+==================================================================
+
+==================================================================
+
+==================================================================
+POST /graphql HTTP/1.1
+HOST: 127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " mutation addUser ($username: String!, $password: String!){\n        addUser (username: $username, password: $password){\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {"username": "*", "password": "*"}, "operationName": "addUser"}
+==================================================================
+
+==================================================================
+
+==================================================================
+POST /graphql HTTP/1.1
+HOST: 127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " mutation addUserInput ($user: AddUserInput!){\n        addUserInput (user: $user){\n                  id\n                  username\n                 }\n             \n        }\n        ", "variables": {"user": {"username": "*", "password": "*"}}, "operationName": "addUserInput"}
+==================================================================
+
+==================================================================
+
+==================================================================
+POST /graphql HTTP/1.1
+HOST: 127.0.0.1:8000
+Authorization: Bearer token
+Content-Type: application/json
+
+{"query": " mutation delUser ($id: Int!){\n        delUser (id: $id){\n                  errmsg\n                 }\n             \n        }\n        ", "variables": {"id": 0}, "operationName": "delUser"}
+==================================================================
+
