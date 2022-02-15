@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "graphql-schema-parse"
-version = "0.2.1"
+version = "0.2.2"
 description = "Graphql文档解析工具，提供解析成前端Postman可用的query语句(.gql) / RESTFul可使用的(.json)文件能力 / sqlmap可用的(.txt)扫描文件能力"
 authors = ["柒意 <396667207@qq.com>"]
 readme = "README.md"
